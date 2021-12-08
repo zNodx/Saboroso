@@ -10,6 +10,11 @@ router.get("/", function(req,res,next){
 
 router.get("/login", function(req,res,next){
 
+    console.log(req.session)
+
+   if(!req.session.views) req.session.views =0;
+
+        console.log("SESSION",req.session.views++)
     res.render("admin/login");
 
 
@@ -39,7 +44,6 @@ router.get("/menus", function(req,res,next){
 router.get("/reservations", function(req,res,next){
 
     res.render("admin/reservations",{
-
         date:{}
     });
 
