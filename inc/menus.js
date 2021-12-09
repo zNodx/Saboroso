@@ -1,3 +1,4 @@
+
 let conn =require('./db');
 
 module.exports ={
@@ -22,6 +23,37 @@ module.exports ={
 
         })
         
+    },
+
+    save(fields, files){
+
+        return new Promise((resolve,reject)=>{
+
+            conn.query(`
+            INSERT INTO tb_menus (title, description, price, photo)
+            VALUES(?,?,?,?)
+            `,[
+
+                fields.title,
+                fields.description,
+                fields.price,
+                `images/${files.photo.name}`
+
+            ],(err, results)=>{
+
+                if(err){
+
+                    reject(err);
+
+                }else{
+
+                    resolve(results);
+
+                }
+            });
+
+        });
+
     }
 
 };
