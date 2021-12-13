@@ -1,5 +1,7 @@
 
 let conn =require('./db');
+let path = require('path');
+const { resolve } = require('path');
 
 module.exports ={
 
@@ -8,7 +10,7 @@ module.exports ={
         return new Promise((resolve,reject)=>{
 
             conn.query(`
-                SELECT * FROM tb_menus ORDER BY title
+                SELECT * FROM tb_menus ORDER BY id
             `, (err, results)=>{
 
             if(err){
@@ -29,17 +31,55 @@ module.exports ={
 
         return new Promise((resolve,reject)=>{
 
-            conn.query(`
-            INSERT INTO tb_menus (title, description, price, photo)
-            VALUES(?,?,?,?)
-            `,[
+            fields.photo = `images/${path.parse(files.photo.path).base}`;
 
+            let query,queryPhoto = '', params = [
+                
                 fields.title,
                 fields.description,
-                fields.price,
-                `images/${files.photo.name}`
+                fields.price
+            ];
 
-            ],(err, results)=>{
+
+            if (files.photo.name) {
+
+                console.log("cheguei aqui :D");
+
+                queryPhoto = `, photo = ?`;
+                
+                params.push(fields.photo)
+
+            }
+
+            if(parseInt(fields.id) > 0){
+
+                params.push(fields.id)
+
+                query = `
+                    UPDATE tb_menus
+                    SET title = ?,
+                        description = ?,
+                        price = ?
+                        ${queryPhoto}
+                    WHERE ID = ?
+                `
+                               
+            }else{
+
+                if (!files.photo.name){
+
+                    reject('envie a foto do prato.')
+
+                }
+
+                query=`
+                INSERT INTO tb_menus (title, description, price, photo)
+                VALUES(?,?,?,?)
+                `
+
+            }
+
+            conn.query(query,params,(err, results)=>{
 
                 if(err){
 
@@ -53,6 +93,28 @@ module.exports ={
             });
 
         });
+
+    },
+
+    delete(id){
+
+        return new Promise((resolve, reject)=>{
+
+            conn.query(`
+                DELETE FROM tb_menus WHERE id = ?
+            `, [
+                id
+            ],(err,results)=>{
+
+                if(err){
+                    reject(err);
+                } else {
+                    resolve(results);
+                }
+
+            })
+
+        })
 
     }
 

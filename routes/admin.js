@@ -2,7 +2,11 @@ var express = require('express');
 var users = require('./../inc/users')
 var admin = require('./../inc/admin');
 var menus = require('./../inc/menus');
+var moment = require('moment')
+var reservations = require('./../inc/reservations')
 var router = express.Router();
+
+moment.locale("pt-BR");
 
 router.use(function(req,res,next){
 
@@ -65,7 +69,7 @@ router.post("/login", function(req,res,next){
         users.render(req,res, "Preencha o campo senha");
 
     }else{
-
+        
         users.login(req.body.email,req.body.password).then(user =>{
 
 
@@ -134,20 +138,108 @@ router.post("/menus", function(req,res,next){
 
 });
 
+router.delete("/menus/:id",function (req,res,next){
+
+    menus.delete(req.params.id).then(results =>{
+
+        res.send(results)
+
+    }).catch(err =>{
+
+        res.send(err);
+
+    })
+
+});
+
 router.get("/reservations", function(req,res,next){
 
-    res.render("admin/reservations", admin.getParams(req,{
+    reservations.getReservations().then(data =>{
+        res.render("admin/reservations", admin.getParams(req,{
 
-        date:{}
+            date:{},
+            data,
+            moment
+    
+        }));
 
-    }));
+    })
 
+   
+
+
+});
+
+router.post("/reservations", function(req,res,next){
+
+    reservations.save(req.fields, req.files).then(results =>{
+
+        res.send(results)
+
+    }).catch(err=>{
+
+        res.send(err);
+
+    });
+
+});
+
+router.delete("/reservations/:id",function (req,res,next){
+
+    reservations.delete(req.params.id).then(results =>{
+
+        res.send(results)
+
+    }).catch(err =>{
+
+        res.send(err);
+
+    })
 
 });
 
 router.get("/users", function(req,res,next){
 
-    res.render("admin/users", admin.getParams(req))
+    users.getUsers().then(data =>{
+
+        res.render("admin/users", admin.getParams(req, {
+
+            data
+
+        }));
+
+    });
+
+
+});
+
+router.post("/users", function(req,res,next){
+
+    users.save(req.fields).then(results =>{
+
+        res.send(results);
+
+    }).catch(err =>{
+
+        res.send(err)
+
+    });
+
+
+
+});
+
+router.delete("/users/:id", function(req,res,next){
+
+    users.delete(req.params.id).then(results =>{
+
+        res.send(results);
+
+    }).catch(err =>{
+
+        res.send(err)
+
+    });
 
 });
 module.exports = router;

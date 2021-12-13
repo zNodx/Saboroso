@@ -43,7 +43,7 @@ module.exports ={
             menus:req.menus,
             user: req.session.user
 
-        }, params)
+        }, params);
 
     },
 
