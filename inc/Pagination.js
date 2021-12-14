@@ -31,7 +31,7 @@ class Pagination {
 
         return new Promise((resolve,reject)=>{
 
-            conn.query(this.query,this.params, (err,results) =>{
+            conn.query([this.query,"SELECT FOUND_ROWS() AS FOUND_ROWS"].join(";"),this.params, (err,results) =>{
 
                 if(err){
 
@@ -39,13 +39,12 @@ class Pagination {
 
                 }else{
 
-                    resolve({
+                    this.data = results[0];
+                    this.total = results[1][0].FOUND_ROWS;
+                    this.totalPages = Math.ceil(this.total / this.itensPerPage);
+                    this.currentPage++;
 
-                        data:results,
-                        currentPage: this.currentPage,
-                        total
-                    
-                    })
+                    resolve(this.data);
                         
 
                 }
@@ -54,6 +53,18 @@ class Pagination {
 
         })
 
+    }
+
+    getTotal(){
+        return this.total;
+    }
+
+    getCurrentPage(){
+        return this.currentPage;
+    }
+    
+    getTotalPages(){
+        return this.totalPages;
     }
 
 }

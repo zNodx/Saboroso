@@ -1,5 +1,5 @@
 var conn = require("./db");
-const Pagination = require("./Pagination");
+var Pagination = require("./Pagination");
 module.exports = {
 
     render(req,res,error,success){
@@ -88,7 +88,7 @@ module.exports = {
         if(!page) page =1;
 
         let pag = new Pagination(`
-                SELECT * FROM tb_reservations ORDER BY id  LIMIT ?,?
+                SELECT SQL_CALC_FOUND_ROWS * FROM tb_reservations ORDER BY id LIMIT ?,?
             `);
 
             return pag.getPage(page);
