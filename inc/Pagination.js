@@ -99,6 +99,13 @@ class Pagination {
 
         }
 
+        if (this.getCurrentPage()> 1){
+            links.push({
+                text:'<',
+                href: '?' + this.getQueryString(Object.assign({}, params,{page: this.getCurrentPage()-1})),
+            })
+        }
+
         for (let x = nrStart; x <= nrEnd; x++){
 
             links.push({
@@ -107,6 +114,13 @@ class Pagination {
                 active: (x === this.getCurrentPage())
             })
 
+        }
+
+        if(this.getCurrentPage() < this.getTotalPages()){
+            links.push({
+                text:'>',
+                href: '?' + this.getQueryString(Object.assign({}, params,{page: this.getCurrentPage()+1})),
+            })
         }
 
         return links;
