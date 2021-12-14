@@ -83,15 +83,40 @@ module.exports = {
 
 
     },
-    getReservations(page){
+    getReservations(req){
 
-        if(!page) page =1;
+        return new Promise((resolve, reject)=>{
+            
+            let page = req.query.page;
+            let dtStart = req.query.start;
+            let dtEnd = req.query.end;
 
-        let pag = new Pagination(`
-                SELECT SQL_CALC_FOUND_ROWS * FROM tb_reservations ORDER BY id LIMIT ?,?
-            `);
+            if(!page) page =1;
+    
+            let params = [];
+    
+            if (dtStart && dtEnd) params.push(dtStart, dtEnd);
+    
+            let pag = new Pagination(`
+                    SELECT SQL_CALC_FOUND_ROWS *
+                    FROM tb_reservations 
+                    ${(dtStart && dtEnd) ? "WHERE date BETWEEN ? AND ?" : ''}
+                    ORDER BY id LIMIT ?,?
+                `,params);
+    
+            pag.getPage(page).then(data =>{
 
-            return pag.getPage(page);
+                resolve({
+
+                    data,
+                    links: pag.getNavigation(req.query)
+
+                });
+
+            });
+
+        })
+
         
     },
 
