@@ -6,8 +6,11 @@ var moment = require('moment');
 var reservations = require('./../inc/reservations');
 var contacts = require('../inc/contacts');
 var emails = require('../inc/emails');
-
+const { connect } = require('.');
 var router = express.Router();
+
+
+module.exports = function(io){
 
 moment.locale("pt-BR");
 
@@ -60,6 +63,16 @@ router.get("/", function(req,res,next){
     });
 
 });
+
+router.get("/dashboard", function(req,res,next){
+
+   reservations.dashboard().then(data =>{
+
+    res.send(data)
+
+   })
+
+})
 
 router.post("/login", function(req,res,next){
 
@@ -117,7 +130,7 @@ router.delete("/contacts/:id", function(req,res,next){
     contacts.delete(req.params.id).then(results =>{
 
         res.send(results);
-
+        io.emit('dashboard update');
     }).catch(err =>{
         res.send(err);
     })
@@ -144,7 +157,7 @@ router.delete("/emails/:id",function (req,res,next){
     emails.delete(req.params.id).then(results =>{
 
         res.send(results)
-
+        io.emit('dashboard update');
     }).catch(err =>{
 
         res.send(err);
@@ -176,7 +189,7 @@ router.post("/menus", function(req,res,next){
     menus.save(req.fields, req.files).then(results =>{
 
         res.send(results)
-
+        io.emit('dashboard update');
     }).catch(err=>{
 
         res.send(err);
@@ -190,7 +203,7 @@ router.delete("/menus/:id",function (req,res,next){
     menus.delete(req.params.id).then(results =>{
 
         res.send(results)
-
+        io.emit('dashboard update');
     }).catch(err =>{
 
         res.send(err);
@@ -242,7 +255,7 @@ router.post("/reservations", function(req,res,next){
     reservations.save(req.fields, req.files).then(results =>{
 
         res.send(results)
-
+        io.emit('dashboard update');
     }).catch(err=>{
 
         res.send(err);
@@ -256,7 +269,7 @@ router.delete("/reservations/:id",function (req,res,next){
     reservations.delete(req.params.id).then(results =>{
 
         res.send(results)
-
+        io.emit('dashboard update');
     }).catch(err =>{
 
         res.send(err);
@@ -285,7 +298,7 @@ router.post("/users", function(req,res,next){
     users.save(req.fields).then(results =>{
 
         res.send(results);
-
+        io.emit('dashboard update');
     }).catch(err =>{
 
         res.send(err)
@@ -317,7 +330,7 @@ router.delete("/users/:id", function(req,res,next){
     users.delete(req.params.id).then(results =>{
 
         res.send(results);
-
+        io.emit('dashboard update');
     }).catch(err =>{
 
         res.send(err)
@@ -325,4 +338,7 @@ router.delete("/users/:id", function(req,res,next){
     });
 
 });
-module.exports = router;
+
+    return router;
+
+};

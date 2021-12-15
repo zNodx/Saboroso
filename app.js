@@ -7,40 +7,56 @@ var RedisStore = require('connect-redis')(session);
 var cookieParser = require('cookie-parser');
 var formidable = require('formidable');
 var redisClient = redis.createClient();
+var http = require('http');
+var socket = require('socket.io')
 var logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-var adminRouter = require('./routes/admin');
+
 
 var app = express();
 
+var http = http.Server(app);
+var io = socket(http);
+
+io.on('connection', function(socket){
+  
+  console.log('Novo usuário conectado!');
+  
+});
+
+var indexRouter = require('./routes/index')(io);
+var adminRouter = require('./routes/admin')(io);
+
+
 app.use(function(req,res,next){
 
+  req.body = {}
+  
   if( req.method === 'POST'){
-
+    
     var form = formidable.IncomingForm({
-
+      
       uploadDir:path.join(__dirname, "/public/images"),
       keepExtensions:true
-  
+      
     });
-  
+    
     form.parse(req, function(err, fields, files){
-  
+      
       req.body = fields;
       req.fields = fields;
       req.files = files;
-
+      
       next();
-  
+      
     });
-
+    
   }else {
-
+    
     next();
     
   }
-
+  
 });
 
 // view engine setup
@@ -48,7 +64,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(session({
- 
+  
   store: new RedisStore({
     host:'localhost',
     port:6379
@@ -56,12 +72,13 @@ app.use(session({
   secret:'p@ssw0rd',
   resave: true,
   saveUninitialized: true
- 
+  
 }));
 
 app.use(logger('dev'));
-app.use(express.json());
+//app.use(express.json());
 //app.use(express.urlencoded({ extended: false }));
+
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -85,4 +102,9 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+http.listen(3000, function(){
+
+  console.log('servidor em execução...')
+
+});
+
